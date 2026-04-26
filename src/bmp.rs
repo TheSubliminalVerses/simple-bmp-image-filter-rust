@@ -1,51 +1,29 @@
-use std::any::Any;
-use std::fs::File;
-use std::io::{BufReader, BufWriter, Error, Read, Seek, SeekFrom, Write};
-
-macro_rules! load_struct_data {
-    ($head:ident, $($tail:expr),+) => {
-        {
-            let mut bytes = 0;
-            let mut reader = BufReader::new($head);
-            $(bytes += reader.read(&mut $tail).unwrap();)*
-            bytes
-        }
-    };
-}
-
-macro_rules! write_struct_data {
-    ($head:ident, $($tail:expr),+) => {
-        {
-            $($head.write(&$tail).unwrap();)*
-        }
-    };
-}
-
 pub struct BMPFileHeader {
-    bf_type: [u8; 2],
-    bf_size: [u8; 4],
-    bf_reserved1: [u8; 2],
-    bf_reserved2: [u8; 2],
-    bf_off_bits: [u8; 4],
+    pub bf_type: [u8; 2],
+    pub bf_size: [u8; 4],
+    pub bf_reserved1: [u8; 2],
+    pub bf_reserved2: [u8; 2],
+    pub bf_off_bits: [u8; 4],
 }
 
 pub struct BMPInfoHeader {
-    bi_size: [u8; 4],
-    bi_width: [u8; 4],
-    bi_height: [u8; 4],
-    bi_bit_count: [u8; 2],
-    bi_compression: [u8; 4],
-    bi_size_image: [u8; 4],
-    bi_x_pixels_per_meter: [u8; 4],
-    bi_y_pixels_per_meter: [u8; 4],
-    bi_crl_used: [u8; 4],
-    bi_crl_important: [u8; 4],
+    pub bi_size: [u8; 4],
+    pub bi_width: [u8; 4],
+    pub bi_height: [u8; 4],
+    pub bi_planes: [u8; 2],
+    pub bi_bit_count: [u8; 2],
+    pub bi_compression: [u8; 4],
+    pub bi_size_image: [u8; 4],
+    pub bi_x_pixels_per_meter: [u8; 4],
+    pub bi_y_pixels_per_meter: [u8; 4],
+    pub bi_crl_used: [u8; 4],
+    pub bi_crl_important: [u8; 4],
 }
 
 pub struct Pixel {
-    blue: [u8; 1],
-    green: [u8; 1],
-    red: [u8; 1],
+    pub blue: [u8; 1],
+    pub green: [u8; 1],
+    pub red: [u8; 1],
 }
 
 impl BMPFileHeader {
@@ -57,17 +35,6 @@ impl BMPFileHeader {
             bf_reserved2: [0; 2],
             bf_off_bits: [0; 4],
         }
-    }
-    
-    pub fn read_from_file(&mut self, file: &File) -> usize {
-        let bytes = load_struct_data!(file, self.bf_type, self.bf_size, self.bf_reserved1,
-            self.bf_reserved2, self.bf_off_bits);
-        bytes
-    }
-
-    pub fn write_to_file(&self, file: &mut File) {
-        write_struct_data!(file, self.bf_type, self.bf_size, self.bf_reserved1, self.bf_reserved2,
-        self.bf_off_bits);
     }
     
     pub fn get_type(&self) -> u16 {
@@ -82,6 +49,7 @@ impl BMPInfoHeader {
             bi_width: [0; 4],
             bi_height: [0; 4],
             bi_bit_count: [0; 2],
+            bi_planes: [0; 2],
             bi_compression: [0; 4],
             bi_size_image: [0; 4],
             bi_x_pixels_per_meter: [0; 4],
@@ -89,19 +57,6 @@ impl BMPInfoHeader {
             bi_crl_used: [0; 4],
             bi_crl_important: [0; 4],
         }
-    }
-
-    pub fn read_from_file(&mut self, file: &File) -> usize {
-        let bytes = load_struct_data!(file, self.bi_size, self.bi_width,self.bi_height,
-        self.bi_bit_count, self.bi_compression, self.bi_size_image, self.bi_x_pixels_per_meter,
-        self.bi_y_pixels_per_meter, self.bi_crl_used, self.bi_crl_important);
-        bytes
-    }
-
-    pub fn write_to_file(&self, file: &mut File) {
-        write_struct_data!(file, self.bi_size, self.bi_width, self.bi_height,
-        self.bi_bit_count, self.bi_compression, self.bi_size_image, self.bi_x_pixels_per_meter,
-        self.bi_y_pixels_per_meter, self.bi_crl_used, self.bi_crl_important);
     }
     
     pub fn get_dim(&self) -> (i32, i32) {
@@ -114,10 +69,6 @@ impl Pixel {
         Pixel { blue, green, red, }
     }
 
-    pub fn write_to_file(&self, file: &mut File) {
-        write_struct_data!(file, self.blue, self.green, self.red);
-    }
-    
     pub fn set_blue(&mut self, blue: u8) {
         self.blue = u8::to_le_bytes(blue);
     }
