@@ -1,5 +1,5 @@
 use std::fs::{File};
-use std::io::{Seek, SeekFrom, BufReader, Read};
+use std::io::{Seek, SeekFrom, BufReader, Read, Write};
 use crate::bmp::{BMPFileHeader, BMPInfoHeader, Pixel};
 use crate::helpers::to_grayscale;
 
@@ -86,9 +86,7 @@ fn main() {
         "-g" => to_grayscale(width, height, &mut image),
         _ => panic!("Invalid file flag: {}", flag),
     }
+    
 
-    let out = match File::create(outfile) {
-        Ok(file) => file,
-        Err(why) => panic!("Error creating file: {}", why),
-    };
+    println!("DONE!");
 }
