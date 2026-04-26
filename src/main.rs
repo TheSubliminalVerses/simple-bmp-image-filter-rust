@@ -1,8 +1,10 @@
 use std::fs::{File};
-use std::io::{Seek, SeekFrom};
-use crate::bmp::{BMPFileHeader, BMPInfoHeader};
+use std::io::{Seek, SeekFrom, BufReader, Read};
+use crate::bmp::{BMPFileHeader, BMPInfoHeader, Pixel};
+use crate::helpers::to_grayscale;
 
 mod bmp;
+mod helpers;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -46,7 +48,47 @@ fn main() {
         Err(why) => panic!("Error reading file: {}", why),
     }
 
+    let width = bih.get_dim().0.abs() as usize;
+    let height = bih.get_dim().1.abs() as usize;
 
-    println!("Magic Number: 0x{:x}", bfh.get_type());
-    println!("Width: {}, Height: {}", bih.get_dim().0, bih.get_dim().1);
+    let mut image: Vec<Vec<Pixel>> = Vec::with_capacity(height);
+
+    let mut reader = BufReader::new(&file);
+
+    for y in 0..height {
+        let mut row: Vec<Pixel> = Vec::with_capacity(width);
+        for _ in 0..width {
+            let mut blue: [u8; 1] = [0; 1];
+            let mut green: [u8; 1] = [0; 1];
+            let mut red: [u8; 1] = [0; 1];
+
+            match reader.read_exact(&mut blue) {
+                Ok(_) => {},
+                Err(why) => panic!("Error reading file: {}", why),
+            }
+
+            match reader.read_exact(&mut green) {
+                Ok(_) => {},
+                Err(why) => panic!("Error reading file: {}", why),
+            }
+
+            match reader.read_exact(&mut red) {
+                Ok(_) => {},
+                Err(why) => panic!("Error reading file: {}", why),
+            }
+
+            row.push(Pixel::new(blue, green, red));
+        }
+        image.push(row);
+    }
+
+    match flag.as_str() {
+        "-g" => to_grayscale(width, height, &mut image),
+        _ => panic!("Invalid file flag: {}", flag),
+    }
+
+    let out = match File::create(outfile) {
+        Ok(file) => file,
+        Err(why) => panic!("Error creating file: {}", why),
+    };
 }

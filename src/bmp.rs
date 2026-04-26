@@ -33,6 +33,12 @@ pub struct BMPInfoHeader {
     bi_crl_important: [u8; 4],
 }
 
+pub struct Pixel {
+    blue: [u8; 1],
+    green: [u8; 1],
+    red: [u8; 1],
+}
+
 impl BMPFileHeader {
     pub fn new() -> BMPFileHeader {
         BMPFileHeader {
@@ -80,5 +86,35 @@ impl BMPInfoHeader {
     
     pub fn get_dim(&self) -> (i32, i32) {
         (i32::from_le_bytes(self.bi_width), i32::from_le_bytes(self.bi_height))
+    }
+}
+
+impl Pixel {
+    pub fn new(blue: [u8; 1], green: [u8; 1], red: [u8; 1]) -> Pixel {
+        Pixel { blue, green, red, }
+    }
+    
+    pub fn set_blue(&mut self, blue: u8) {
+        self.blue = u8::to_le_bytes(blue);
+    }
+    
+    pub fn set_green(&mut self, green: u8) {
+        self.green = u8::to_le_bytes(green);
+    }
+    
+    pub fn set_red(&mut self, red: u8) {
+        self.red = u8::to_le_bytes(red);
+    }
+    
+    pub fn get_blue(&self) -> u8 {
+        u8::from_le_bytes(self.blue)
+    }
+    
+    pub fn get_green(&self) -> u8 {
+        u8::from_le_bytes(self.green)
+    }
+    
+    pub fn get_red(&self) -> u8 {
+        u8::from_le_bytes(self.red)
     }
 }
