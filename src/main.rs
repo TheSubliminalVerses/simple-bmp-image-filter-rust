@@ -1,8 +1,11 @@
 use std::fs::File;
-use handler::BMPFile;
 
 mod bmp;
 mod handler;
+mod filter;
+
+use handler::BMPFile;
+use crate::filter::{to_grayscale, to_sepia};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -31,12 +34,17 @@ fn main() {
     bmp_file.read_headers(&mut file);
 
     bmp_file.read_image_data(&mut file);
-    let image_ref = bmp_file.get_image_ref_as_mut();
 
-    for y in 0..1 {
-        for x in 0..4 {
-            println!("Blue: 0x{:x}, Green: 0x{:x}, Red: 0x{:x}",
-            image_ref[y][x].get_blue(), image_ref[y][x].get_green(), image_ref[y][x].get_red());
+    let height = bmp_file.get_bih().get_dim().1.abs() as usize;
+
+    let image_ref = bmp_file.get_image_ref_as_mut();
+    let stride = image_ref[0].len();
+
+    match flag.as_str() {
+        "-g" => to_grayscale(stride, height, image_ref),
+        "-s" => to_sepia(stride, height, image_ref),
+        _ => {
+            panic!("Invalid flag! {}", flag);
         }
     }
 
