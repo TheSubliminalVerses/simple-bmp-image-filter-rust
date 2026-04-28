@@ -5,7 +5,7 @@ mod handler;
 mod filter;
 
 use handler::BMPFile;
-use crate::filter::{to_grayscale, to_sepia};
+use crate::filter::{box_blur, edge_detection, to_grayscale, to_sepia};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -35,14 +35,16 @@ fn main() {
 
     bmp_file.read_image_data(&mut file);
 
+    let width = bmp_file.get_bih().get_dim().0.abs() as usize;
     let height = bmp_file.get_bih().get_dim().1.abs() as usize;
 
     let image_ref = bmp_file.get_image_ref_as_mut();
-    let stride = image_ref[0].len();
 
     match flag.as_str() {
-        "-g" => to_grayscale(stride, height, image_ref),
-        "-s" => to_sepia(stride, height, image_ref),
+        "-g" => to_grayscale(width, height, image_ref),
+        "-s" => to_sepia(width, height, image_ref),
+        "-b" => box_blur(width, height, 1, image_ref),
+        "-e" => edge_detection(width, height, 1, image_ref),
         _ => {
             panic!("Invalid flag! {}", flag);
         }

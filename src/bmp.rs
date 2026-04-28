@@ -20,6 +20,7 @@ pub struct BMPInfoHeader {
     pub bi_crl_important: [u8; 4],
 }
 
+#[derive(Copy, Clone)]
 pub struct Pixel {
     pub blue: [u8; 1],
     pub green: [u8; 1],
